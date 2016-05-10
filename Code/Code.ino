@@ -37,8 +37,8 @@ int oldBallY = ballY;
 
 //Enemy paddle data
 float interEnemyX;
-int enemySpeed = 5; //Number of milliseconds it takes to move one pixel for enemy paddle.
-int enemySpeedA = enemySpeed;
+float enemySpeed = 4; //Number of milliseconds it takes to move one pixel for enemy paddle.
+float enemySpeedA = enemySpeed;
 int enemyLocationX = (wall1 / 2) - int((paddleSize / 2)); //Pixel X value for the enemy paddle
 int enemyLocationY =  wall0 + (paddleBuffer + paddleSizeO); //Pixel Y value for the enemy paddle. Constant.
 int enemyTarget = ballX;
@@ -78,8 +78,16 @@ void boingyBoingyBoingy(){ //All hail Animaniacs
   if(ballYCenter >= wall2B || ballYCenter <= wall0B){
     ballYSpeed = -ballYSpeed;
   }
-  if(((ballYCenter + ballRadius) >= paddlePlaceY && (ballYCenter - ballRadius) <= (paddlePlaceY + paddleSizeO) && (ballXCenter + ballRadius) >= paddlePlaceX && (ballXCenter + ballRadius) <= (paddlePlaceX + paddleSize)) || ((ballYCenter - ballRadius) <= paddlePlaceY && (ballYCenter + ballRadius) >= (paddlePlaceY + paddleSizeO) && (ballXCenter - ballRadius) <= paddlePlaceX && (ballXCenter + ballRadius) >= (paddlePlaceX + paddleSize))){
+  if(((ballYCenter + ballRadius) >= paddlePlaceY && (ballYCenter - ballRadius) <= (paddlePlaceY + paddleSizeO) && (ballXCenter + ballRadius) >= paddlePlaceX && (ballXCenter - ballRadius) <= (paddlePlaceX + paddleSize)) || ((ballYCenter - ballRadius) <= paddlePlaceY && (ballYCenter + ballRadius) >= (paddlePlaceY + paddleSizeO) && (ballXCenter - ballRadius) <= paddlePlaceX && (ballXCenter + ballRadius) >= (paddlePlaceX + paddleSize))){
     if((ballYCenter + (ballRadius-1)) >= paddlePlaceY && (ballYCenter - (ballRadius-1)) <= (paddlePlaceY + paddleSizeO)){
+      ballXSpeed = -ballXSpeed;
+    }
+    else{
+     ballYSpeed = -ballYSpeed;
+    }
+  }
+  if(((ballYCenter + ballRadius) >= enemyLocationY && (ballYCenter - ballRadius) <= (enemyLocationY + paddleSizeO) && (ballXCenter + ballRadius) >= enemyLocationX && (ballXCenter - ballRadius) <= (enemyLocationX + paddleSize)) || ((ballYCenter - ballRadius) <= enemyLocationY && (ballYCenter + ballRadius) >= (enemyLocationY + paddleSizeO) && (ballXCenter - ballRadius) <= enemyLocationX && (ballXCenter + ballRadius) >= (enemyLocationX + paddleSize))){
+    if((ballYCenter + (ballRadius-1)) >= enemyLocationY && (ballYCenter - (ballRadius-1)) <= (enemyLocationY + paddleSizeO)){
       ballXSpeed = -ballXSpeed;
     }
     else{
@@ -160,11 +168,11 @@ void setup() {
 
   tft.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
-  goGoGadgetPlayerPaddle();
 }
 
 void loop() {
   doTheBall();
+  goGoGadgetPlayerPaddle();
   enemyPaddleDraw();
   delay(1);
   /*if(ballYCenter >= wall2B){
