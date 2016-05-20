@@ -65,7 +65,6 @@ int oldEnemyX = 1;
 int paddlePlaceX = int(round(analogRead(potPinR) * divider)); //Pixel X value of your paddle as read by potentiometer. Between 0 and (320-paddleSize)
 int paddlePlaceY = wall2 - paddleBuffer; //Pixel Y valued of your paddle. Constant.
 int oldPaddleX = paddlePlaceX;
-int oldPaddleY = paddlePlaceY;
 int directionthingy = 0;
 
 int wall0B = wall0 + (ballRadius);
@@ -116,8 +115,8 @@ void boingyBoingyBoingy(){ //All hail Animaniacs
      delay(20);
     }
   }
-  if(((ballYCenter + ballRadius) >= enemyLocationY && (ballYCenter - ballRadius) <= (enemyLocationY + paddleSizeO) && (ballXCenter + ballRadius) >= enemyLocationX && (ballXCenter - ballRadius) <= (enemyLocationX + paddleSize))/* || ((ballYCenter - ballRadius) <= enemyLocationY && (ballYCenter + ballRadius) >= (enemyLocationY + paddleSizeO) && (ballXCenter - ballRadius) <= enemyLocationX && (ballXCenter + ballRadius) >= (enemyLocationX + paddleSize))*/){
-    if((ballYCenter + (ballRadius-1)) >= enemyLocationY && (ballYCenter - (ballRadius-1)) <= (enemyLocationY + paddleSizeO)){
+  if(((ballYCenter + ballRadius) >= enemyLocationY && (ballYCenter - ballRadius) <= (enemyLocationY + paddleSizeO) && (ballXCenter + ballRadius) >= enemyLocationX && (ballXCenter - ballRadius) <= (enemyLocationX + paddleSize)) && ((ballYCenter - ballRadius) <= enemyLocationY && (ballYCenter + ballRadius) >= (enemyLocationY + paddleSizeO) && (ballXCenter - ballRadius) <= enemyLocationX && (ballXCenter + ballRadius) >= (enemyLocationX + paddleSize))){
+    if(ballYCenter >= enemyLocationY && ballYCenter <= (enemyLocationY + paddleSizeO)){
       ballXSpeed = -ballXSpeed;
     }
     else{
@@ -137,11 +136,6 @@ void doTheBall() {
 
 void playerPaddleCleanUp() {
   tft.drawRect(paddlePlaceX - 1, paddlePlaceY - 1, paddleSize + 2, paddleSizeO + 2, ILI9341_BLACK);
-}
-
-void goGoGadgetPlayerPaddle(){
-  tft.fillRect(paddlePlaceX, paddlePlaceY, paddleSize, paddleSizeO, ILI9341_WHITE);
-  playerPaddleCleanUp();
 }
 
 void enemyPaddleCleanUp(){
@@ -165,9 +159,13 @@ void enemyPaddleCalculator(){
 }
 
 void enemyPaddleDraw(){
-  tft.fillRect(enemyLocationX, enemyLocationY, paddleSize, paddleSizeO, ILI9341_WHITE); 
-  enemyPaddleCleanUp();
-  enemyPaddleCalculator();
+  if(enemyLocationX != oldEnemyX){
+    tft.fillRect(enemyLocationX, enemyLocationY, paddleSize, paddleSizeO, ILI9341_WHITE); 
+    enemyPaddleCleanUp();
+  }
+  if(ballXCenter + ballRadius < enemyLocationX || ballXCenter - ballRadius > enemyLocationX + paddleSize){
+    enemyPaddleCalculator();
+  }
 }
 
 void playerCleanUp(){
@@ -187,17 +185,20 @@ void playerCalculator(){
   if(potInfo - paddlePlaceX == 0){
     directionthingy = 0;
   }
+  oldPaddleX = paddlePlaceX;
   paddlePlaceX = paddlePlaceX + directionthingy;
 }
 
 void playerPaddleDraw(){
-  tft.fillRect(paddlePlaceX, paddlePlaceY, paddleSize, paddleSizeO, ILI9341_WHITE);
-  playerCleanUp();
+  if(paddlePlaceX != oldPaddleX){
+    tft.fillRect(paddlePlaceX, paddlePlaceY, paddleSize, paddleSizeO, ILI9341_WHITE);
+    playerCleanUp();
+  }
   playerCalculator();
 }
 
 void winF(){
-  if(ballY + (ballRadius * 2) >= wall2){
+  if(ballYCenter + ballRadius >= wall2){
     win = 1;
     oP = pPoints;
     pPoints = pPoints + 1;
@@ -205,7 +206,7 @@ void winF(){
 }
 
 void loseF(){
-  if(ballY - (ballRadius * 2) <= wall0){
+  if(ballYCenter - ballRadius * 2 <= wall0){
     lose = 1;
     oE = ePoints;
     ePoints = ePoints + 1;
@@ -225,16 +226,15 @@ void winLoseF(){
   winF();
   loseF();
   if(win == 1 || lose ==1){
-    cleanUpCleanUp();
+    delay(delayTime);
+    tft.fillRect(ballX - 1, ballY - 1, (ballRadius * 2) + 2, (ballRadius * 2) + 2, ILI9341_BLACK);
     ballX = oBallX;
     ballY = oBallY;
     ballInterX = float(oBallX);
     ballInterY = float(oBallY);
     win = 0;
     lose = 0;
-    delay(delayTime);
   }
-  pointDraw();
 }
 
 void setup() {
@@ -269,9 +269,11 @@ void setup() {
 
 void loop() {
   doTheBall();
-  goGoGadgetPlayerPaddle();
   enemyPaddleDraw();
   playerPaddleDraw();
-  winLoseF();
+  if(oldBallY != ballY){
+    winLoseF();
+  }
+  pointDraw();
   delay(1);
 }
